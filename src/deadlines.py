@@ -83,7 +83,7 @@ async def help(ctx):
         embed = discord.Embed(
             title = "Help Menu",
             colour = 6282752,
-            description = "**There are 3 commands built-in currently:**\n\n"+
+            description = "**There are 4 commands built-in currently:**\n\n"+
             "\t`!assign <course/'ALL'>`  - Displays all assignments of the given course\n\n" +
             "\t`!startin <course/'ALL'> <#_of_days>`  - Displays assignments of the given course which starts within the days given\n\n"+
             "\t`!duein <course/'ALL'> <#_of_days>`  - Displays assignments of the given course which are due within the days given\n\n"+
@@ -211,7 +211,7 @@ async def background_task():
     while not bot.is_closed():
         now = datetime.datetime.now()
         min_now = datetime.datetime.combine(datetime.date.min, now.time())
-        print(now.time())
+        #print(now.time())
 
         # use this for actual: if (min_now >= (constantTime-delta) and min_now <= (constantTime+delta)) and old_date.day != now.day:
         # for testing: if now.minute%1 == 0  and old_date.minute != now.minute:
