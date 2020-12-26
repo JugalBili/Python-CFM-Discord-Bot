@@ -7,10 +7,11 @@ import datetime
 from tabulate import tabulate # pip install tabulate
 import asyncio
 
-
+# Initializes the Discord bot and set the command
 bot = commands.Bot(command_prefix = "!", intents = discord.Intents.default())
 reminder_channel = None
 
+# Loads the contents of the .env file and assigns them to variables 
 load_dotenv()
 token = os.getenv("DISCORD_TOKEN")
 guild_id = int(os.getenv("GUILD_ID"))
@@ -26,6 +27,7 @@ today = datetime.datetime.today()
 todayDate = datetime.datetime(year = today.year, month= today.month, day = today.day)
 headers = ["Course", "Assignment", "Start Date", "Due Date"]
 
+# Connects to the MySQL Database 
 mydb = mysql.connector.connect(
     host=host,
     database=db,
@@ -37,7 +39,18 @@ print(mydb)
 mycursor = mydb.cursor()
 
 
-def get_items(command: str, course: str, days: int, day_delta):
+def get_items(command: str, course: str, day_delta):
+    """ This function recieves 3 arguments and executes queries in the MySQL Database
+    and returns the list results from the query. 
+
+    Arguments: 
+
+    command -- The string section of the command given by the user ('startin' or 'duein')
+    course -- The string of the course given with the command (can be 'all')
+    day_delta -- A datetime.timedelta object which allows MySQL to return querys of assignments starting/due int he future 
+
+    """
+
     if command.lower() == "startin":
         if course.lower() == "all":
             mycursor.execute(f"SELECT * FROM Deadlines WHERE Deadlines.`Start Date`>='{todayDate}' AND Deadlines.`Start Date`<'{todayDate+day_delta}' ORDER BY Course ASC, `Start Date` ASC")
@@ -55,30 +68,50 @@ def get_items(command: str, course: str, days: int, day_delta):
 
 
 def check_list(results):
+    """ This function checks the length of the results array given and returns
+    a string if it is empty, or returns a tabulated/formatetd chart if not empty.
+
+    Arguments: 
+
+    results -- An array of the values from the queried MySQL database which was performed
+    in the above function. 
+
+    """
     if len(results) == 0:
         return "None ＼(^o^)／"
     else:
-        return tabulate(results, headers = headers)
+        return tabulate(results, headers = headers) 
 
 @bot.event 
 async def on_ready():
+    """ Function is executed when the bot initially connects to the server """
+
     print("Logged on as {0}!".format(bot))
     print(bot.user)
+
     global reminder_channel
-    
+
+    # Loops throught the list of channels in the server and gets the channel id of the channels specefied.
+    #   In this case it is "bot-reminders"
     for channels in (await discord.Guild.fetch_channels(await bot.fetch_guild(guild_id))):
         if channels.name == "bot-reminders":
             reminder_channel = channels.id
 
+    # Creates a loop task for the function backcground_task() for the deailt 9 AM reminder feature
     bot.loop.create_task(background_task())
 
 
+# removes the built-in help command 
 bot.remove_command('help')
 
 @bot.command(name="help")
 async def help(ctx):
+    """ Function is executed when the user enters the help command '!help'. 
+    
+    Creates and sends a discord Embed object which consists a list of all commands currently present in the bot. 
+    """
 
-    if (ctx.message.channel.name == channel_name):
+    if (ctx.message.channel.name == channel_name): # checks to see if the channel is the same as the one specified at the beginning of the file
 
         embed = discord.Embed(
             title = "Help Menu",
@@ -90,12 +123,15 @@ async def help(ctx):
             "\t`!courses`  - Displays the list of courses\n"
         )
 
-        await ctx.send(embed=embed)
+        await ctx.send(embed=embed) # sends the embed message to the discord channel
 
 
 @bot.command(name="courses")
 async def courses(ctx):
+    """ Executed when the user enters the courses command '!courses'.
 
+    Creates and sends a discord Embed object which consists a list of all courses which can be used in other commands. 
+    """
     if (ctx.message.channel.name == channel_name):
 
         embed = discord.Embed(
@@ -104,11 +140,21 @@ async def courses(ctx):
             description= "- `AFM101`\n- `AFM132`\n- `CS135`\n- `MATH135`\n- `MATH137`"
             )
 
-        await ctx.send(embed=embed)
+        await ctx.send(embed=embed) # sends the embed message to the discord channel
 
 
 @bot.command(name="assign")
 async def assign(ctx, course: str):
+    """ Executed when the user enters the assignment command '!assign'.
+
+    Recieves a course as an argument to the command (or 'all') and sends queries the MySQL database to 
+    get all entries which match the course entered and sorts it in start date time in ascending order. 
+
+    Argument:
+
+    course -- The string of the course given with the command (can be 'all')
+
+    """
     if (ctx.message.channel.name == channel_name):
 
         if course.lower() == "all":
@@ -118,7 +164,7 @@ async def assign(ctx, course: str):
         
         result= mycursor.fetchall()
 
-        await ctx.send(f"```\n{tabulate(result, headers = headers)}\n```")
+        await ctx.send(f"```\n{tabulate(result, headers = headers)}\n```") # sends the tabulated queries to the discord channel
 
     else:
         return
@@ -126,14 +172,29 @@ async def assign(ctx, course: str):
 
 @bot.command(name="duein")
 async def due_in(ctx, course: str, days: int):
+    """ Executed when the user enters the due in command '!duein'.
+
+    Recieves a course as an argument to the command (or 'all') and the number of days to check 
+    when assignments are due in. It calls the get_items function to sends queries the MySQL database to get all 
+    entries which match the entered arguments.
+
+    Arguments:
+
+    course -- The string of the course given with the command (can be 'all')
+    days -- Integer of the number of days to check when the assignemnt is due in
+
+    """
+
     if (ctx.message.channel.name == channel_name):
         day_delta = datetime.timedelta(days = days+1)
 
-        result = get_items("duein", course, days, day_delta)
+        result = get_items("duein", course, day_delta)
         
+        # sends a message saying there are no assignments due if the resultant queried database list is empty 
         if len(result) == 0:
             await ctx.send(f"```\nThere are no assignments due in {days} days! :smiley:\n```")
         
+        # else sends the tabulated graph of the list 
         else:
             await ctx.send(f"```\n{tabulate(result, headers = headers)}\n```")
 
@@ -143,14 +204,29 @@ async def due_in(ctx, course: str, days: int):
 
 @bot.command(name="startin")
 async def start_in(ctx, course: str, days: int):
+    """ Executed when the user enters the stat in command '!startin'.
+
+    Recieves a course as an argument to the command (or 'all') and the number of days to check 
+    when assignments are starting in. It calls the get_items function to sends queries the MySQL database to get all 
+    entries which match the entered arguments.
+
+    Arguments:
+
+    course -- The string of the course given with the command (can be 'all')
+    days -- Integer of the number of days to check when the assignemnt is due in
+
+    """
+
     if (ctx.message.channel.name == channel_name):
         day_delta = datetime.timedelta(days = days+1)
 
-        result = get_items("startin", course, days, day_delta)
+        result = get_items("startin", course, day_delta)
 
+        # sends a message saying there are no assignments starting if the resultant queried database list is empty 
         if len(result) == 0:
             await ctx.send(f"There are no assignments starting in {days} days! :smiley:")
         
+        # else sends the tabulated graph of the list 
         else:
             await ctx.send(f"```\n{tabulate(result, headers = headers)}\n```")
 
@@ -163,6 +239,11 @@ async def start_in(ctx, course: str, days: int):
 @due_in.error
 @courses.error
 async def errors(ctx, error):
+    """ This function is only called if an error occures in one of the command functions. 
+    
+    Sends a embed object specefied message if the error is a BadArgument or MissingRequiredArgumtne error, 
+    else sends a general error message. 
+    """
     message = ctx.message.content
 
     if isinstance(error, commands.BadArgument) or isinstance(error, commands.MissingRequiredArgument):
@@ -199,15 +280,17 @@ async def errors(ctx, error):
         await ctx.send(embed = embed)
 
 
-
+# constant time datetiem object which sets the time when to send the reminder
 constantTime = datetime.datetime.combine(datetime.date.min, datetime.time(hour = 9, minute= 00, second = 00))
-delta = datetime.timedelta(minutes = 5)
+delta = datetime.timedelta(minutes = 5) # timedelta object which essentially acts as a 5 minute error to the reminder
 
 async def background_task():
+    """ This task is the background task which enables the dailt 9 AM reminders to work. """
+
     # use this for actual: old_date = datetime.datetime.now() - datetime.timedelta(days=1)
     # for testing: old_date = datetime.datetime.now() - datetime.timedelta(minutes=1)
     old_date = datetime.datetime.now() - datetime.timedelta(days=1)
-
+    
     while not bot.is_closed():
         now = datetime.datetime.now()
         min_now = datetime.datetime.combine(datetime.date.min, now.time())
@@ -215,6 +298,9 @@ async def background_task():
 
         # use this for actual: if (min_now >= (constantTime-delta) and min_now <= (constantTime+delta)) and old_date.day != now.day:
         # for testing: if now.minute%1 == 0  and old_date.minute != now.minute:
+
+        # if the current time is >= than the constantTime set and <= to the constantTime + the 5 minuet delta 
+        #     and the date fo the rpevious reminder is the day before, it sends a reminder to the chat
         if (min_now >= constantTime and min_now <= (constantTime+delta)) and old_date.day != now.day:
             print("old minute: "+str(old_date.minute) + " Now minute: " + str(now.minute))
             formatted_time = now.strftime("%a, %b %d %Y at %I:%M %p")
@@ -223,12 +309,14 @@ async def background_task():
             due_result = get_items("duein", "all", 0, datetime.timedelta(days = 1))
 
             #for testing: await bot.get_channel(reminder_channel).send(f"{formatted_time} : \nTest")
+
             await bot.get_channel(reminder_channel).send(f"**{formatted_time}**"+
                 f"\n\nAssignments Starting Today:\n```{check_list(start_result)}```\nAssignments Due Today:\n```{check_list(due_result)}```<@&{reminder_role}>")
             
             old_date = now
                
-        await asyncio.sleep(30)
+        await asyncio.sleep(30) #loops every 30 seconds
 
 
+# runs the bot loop given the the bot api token 
 bot.run(token)
