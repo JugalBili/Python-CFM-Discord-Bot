@@ -77,7 +77,7 @@ Since the provate information such as the discord bot token, channel id, ping ro
 ### Executing
 To execute to program, open the zip file into an IDE of your choice, or use the following in the termial: 
 ```bash
-python deadlines.py
+python CFM_Bot.py
 ```
 > **Make Sure** to run the command inside the src folder
 
