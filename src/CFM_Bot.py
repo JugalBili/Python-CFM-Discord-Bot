@@ -296,7 +296,7 @@ async def errors(ctx, error):
 
 
 # constant time datetime object which sets the time when to send the reminder
-constantTime = datetime.datetime.combine(datetime.date.min, datetime.time(hour = 9, minute= 00, second = 00))
+constantTime = datetime.datetime.combine(datetime.date.min, datetime.time(hour = 9, minute= 00, second = 00), tz)
 delta = datetime.timedelta(minutes = 5) # timedelta object which essentially acts as a 5 minute error to the reminder
 
 async def background_task():
@@ -308,7 +308,7 @@ async def background_task():
     
     while not bot.is_closed():
         now = datetime.datetime.now(tz)
-        min_now = datetime.datetime.combine(datetime.date.min, now.time())
+        min_now = datetime.datetime.combine(datetime.date.min, now.time(), tz)
         #print(now.time())
 
         # use this for actual: if (min_now >= constantTime and min_now <= (constantTime+delta)) and old_date.day != now.day:
