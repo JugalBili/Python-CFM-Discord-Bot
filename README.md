@@ -24,10 +24,10 @@ This bot is currently being run our CFM university program discord server, for a
 - Provides a list of assignments starting in or due in `x` amount of days
 
 #### Commands
-- `!assign <course/'ALL'>`  Displays all assignments of the given course
-- `!startin <course/'ALL'> <#_of_days>`  - Displays assignments of the given course which starts within the days given
-- `!duein <course/'ALL'> <#_of_days>`  - Displays assignments of the given course which are due within the days given
-- `!courses`  - Displays the list of courses
+- `^assign <course/'ALL'>`  Displays all assignments of the given course
+- `^startin <course/'ALL'> <#_of_days>`  - Displays assignments of the given course which starts within the `x` number of days given
+- `^duein <course/'ALL'> <#_of_days>`  - Displays assignments of the given course which are due within the `x` number of days given
+- `^courses`  - Displays a list of courses
 
 > **Note:** More commands may or may not be added in the future 
 
