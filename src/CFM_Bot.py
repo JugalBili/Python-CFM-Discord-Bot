@@ -25,7 +25,8 @@ host = os.getenv("SQL_SERVER")
 port = int(os.getenv("PORT"))
 db = os.getenv("SQL_NAME")
 
-today = datetime.datetime.today()
+tz = pytz.timezone("US/Eastern")
+today = (datetime.datetime.now(tz)).date()
 todayDate = datetime.datetime(year = today.year, month= today.month, day = today.day)
 headers = ["Course", "Assignment", "Start Date", "Due Date"]
 
@@ -306,7 +307,6 @@ async def background_task():
     old_date = old_date = datetime.datetime.now() - datetime.timedelta(days=1)
     
     while not bot.is_closed():
-        tz = pytz.timezone("US/Eastern")
         now = datetime.datetime.now(tz)
         min_now = datetime.datetime.combine(datetime.date.min, now.time())
         #print(now.time())
