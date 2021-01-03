@@ -12,6 +12,7 @@ setup(
         "discord.py==1.5.1"
         "mysql-connector-python==8.0.22"
         "python-dotenv==0.15.0"
+        "pytz>=2020.1"
         "tabulate==0.8.7"
     ],
     python_requires='>=3.6',
