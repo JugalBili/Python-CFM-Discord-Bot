@@ -40,6 +40,7 @@ This bot is currently being run our CFM university program discord server, for a
 - <span>discord</span>.py  == 1.5.1 `pip install discord.py`
 - mysql-connector-python == 8.0.22 `pip install mysql-connector-python`
 - python-dotenv == 0.15.0 `pip install python-dotenv`
+- pytz >= 2020.1 `pip insyall pytz`
 - tabulate == 0.8.7 `pip install tabulate`
 - Mac/Windows OS
 
@@ -55,13 +56,14 @@ Or you can download the zip directly from github.
 
 
 ### Setting Up
-This code will not run without following the set up process stated below. As this program uses the Discord API, you must first get an API token for your bot. A step-by-stp guide is given [here](https://www.writebots.com/discord-bot-token/). 
-Since the provate information such as the discord bot token, channel id, ping role id, and database login information are stored as environmental variables, you must first create a `.env` file within the src folder.  
+This code will not run without following the set up process stated below. As this program uses the Discord API, you must first get an API token for your bot. A step-by-step guide is given [here](https://www.writebots.com/discord-bot-token/). 
+Since the private information such as the discord bot token, channel id, ping role id, and database login information are stored as environmental variables, you must first create a `.env` file within the src folder.  
 
 **Variables include the following:**
 - DISCORD_TOKEN
 - GUILD_ID
 - ROLE_ID
+- REMINDER_CHANNEL_ID
 - CHANNEL_NAME
 - SQL_USER
 - SQL_PASS
