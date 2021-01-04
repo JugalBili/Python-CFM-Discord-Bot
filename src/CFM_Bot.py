@@ -54,6 +54,12 @@ def get_items(command: str, course: str, day_delta):
 
     """
 
+    #reconnects to database if connection is lost
+    if(mydb.is_connected()):
+        pass
+    else:
+        mydb.reconnect(attempts = 1, delay=0)
+
     if command.lower() == "startin":
         if course.lower() == "all":
             mycursor.execute(f"SELECT * FROM Deadlines WHERE Deadlines.`Start Date`>='{todayDate}' AND Deadlines.`Start Date`<'{todayDate+day_delta}' AND Deadlines.Course <> 'Last Ping' ORDER BY `Start Date` ASC")
@@ -152,6 +158,13 @@ async def assign(ctx, course: str):
 
     """
     if (ctx.message.channel.name == channel_name):
+
+        #reconnects to database if connection is lost
+        if(mydb.is_connected()):
+            pass
+        else:
+            mydb.reconnect(attempts = 1, delay=0)
+            
 
         if course.lower() == "all":
             mycursor.execute(f"SELECT * FROM Deadlines WHERE Deadlines.Course <> 'Last Ping' ORDER BY Course ASC, `Start Date` ASC")
