@@ -26,8 +26,6 @@ port = int(os.getenv("PORT"))
 db = os.getenv("SQL_NAME")
 
 tz = pytz.timezone("US/Eastern")
-today = (datetime.datetime.now(tz)).date()
-todayDate = datetime.datetime(year = today.year, month= today.month, day = today.day)
 headers = ["Course", "Assignment", "Start Date", "Due Date"]
 
 # Connects to the MySQL Database 
@@ -53,6 +51,11 @@ def get_items(command: str, course: str, day_delta):
     day_delta -- A datetime.timedelta object which allows MySQL to return a list of assignments starting/due in the future 
 
     """
+
+    # Gets Today's Date
+    today = (datetime.datetime.now(tz)).date()
+    todayDate = datetime.datetime(year = today.year, month= today.month, day = today.day)
+
 
     #reconnects to database if connection is lost
     if(mydb.is_connected()):
