@@ -217,7 +217,7 @@ async def due_in(ctx, course: str, days: int):
         
         # sends a message saying there are no assignments due if the resultant queried database list is empty 
         if len(result) == 0:
-            await ctx.send(f"```\nThere are no assignments due in {days} days! :smiley:\n```")
+            await ctx.send(f"There are no assignments due in {days} days! :smiley:")
         
         # else sends the tabulated graph of the list 
         else:
