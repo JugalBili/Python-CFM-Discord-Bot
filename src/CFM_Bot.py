@@ -215,7 +215,7 @@ async def due_in(ctx, course: str, days: int):
 
     if (ctx.message.channel.name == channel_name):
 
-        if (course.upper() in course_list or course.upper == "ALL"):
+        if (course.upper() in course_list or course.upper() == "ALL"):
             day_delta = datetime.timedelta(days = days+1)
 
             result = get_items("duein", course, day_delta)
@@ -264,7 +264,7 @@ async def start_in(ctx, course: str, days: int):
 
     if (ctx.message.channel.name == channel_name):
 
-        if (course.upper() in course_list or course.upper == "ALL"):
+        if (course.upper() in course_list or course.upper() == "ALL"):
             day_delta = datetime.timedelta(days = days+1)
 
             result = get_items("startin", course, day_delta)
