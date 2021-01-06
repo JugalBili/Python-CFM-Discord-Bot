@@ -27,6 +27,7 @@ db = os.getenv("SQL_NAME")
 
 tz = pytz.timezone("US/Eastern")
 headers = ["Course", "Assignment", "Start Date", "Due Date"]
+course_list =["AFM101", "AFM132", "CS135", "MATH135", "MATH137"]
 
 # Connects to the MySQL Database 
 mydb = mysql.connector.connect(
@@ -142,7 +143,7 @@ async def courses(ctx):
         embed = discord.Embed(
             title = "List of Courses",
             colour = 6673663, 
-            description= "- `AFM101`\n- `AFM132`\n- `CS135`\n- `MATH135`\n- `MATH137`"
+            description= "- `{}`\n- `{}`\n- `{}`\n- `{}`\n- `{}`".format(course_list[0],course_list[1], course_list[2], course_list[3], course_list[4])
             )
 
         await ctx.send(embed=embed) # sends the embed message to the discord channel
@@ -161,28 +162,37 @@ async def assign(ctx, course: str):
 
     """
     if (ctx.message.channel.name == channel_name):
-
-        #reconnects to database if connection is lost
-        if(mydb.is_connected()):
-            pass
-        else:
-            mydb.reconnect(attempts = 1, delay=0)
-            
-
-        if course.lower() == "all":
-            mycursor.execute(f"SELECT * FROM Deadlines WHERE Deadlines.Course <> 'Last Ping' ORDER BY Course ASC, `Start Date` ASC")
-        else:
-            mycursor.execute(f"SELECT * FROM Deadlines WHERE Deadlines.Course='{course.upper()}' ORDER BY Course ASC, `Start Date` ASC")
         
-        result= mycursor.fetchall()
+        if (course.upper() in course_list or course.upper == "ALL"): 
+            #reconnects to database if connection is lost
+            if(mydb.is_connected()):
+                pass
+            else:
+                mydb.reconnect(attempts = 1, delay=0)
+                
 
-        #formats the start and due dates in the result 
-        for x in range(len(result)):
-            result[x] = list(result[x])
-            result[x][2] = result[x][2].strftime("%a, %b %d %Y, %I:%M %p") 
-            result[x][3] = result[x][3].strftime("%a, %b %d %Y, %I:%M %p")
+            if course.lower() == "all":
+                mycursor.execute(f"SELECT * FROM Deadlines WHERE Deadlines.Course <> 'Last Ping' ORDER BY Course ASC, `Start Date` ASC")
+            else:
+                mycursor.execute(f"SELECT * FROM Deadlines WHERE Deadlines.Course='{course.upper()}' ORDER BY Course ASC, `Start Date` ASC")
+            
+            result= mycursor.fetchall()
 
-        await ctx.send(f"```\n{tabulate(result, headers = headers)}\n```") # sends the tabulated queries to the discord channel
+            #formats the start and due dates in the result 
+            for x in range(len(result)):
+                result[x] = list(result[x])
+                result[x][2] = result[x][2].strftime("%a, %b %d %Y, %I:%M %p") 
+                result[x][3] = result[x][3].strftime("%a, %b %d %Y, %I:%M %p")
+
+            await ctx.send(f"```\n{tabulate(result, headers = headers)}\n```") # sends the tabulated queries to the discord channel
+        
+        else: 
+            embed = discord.Embed(
+                title = "Invalid Course Given", 
+                colour = 16718848,
+                description = "Please enter a valid course. \nTo see a list of courses use `^courses`"
+            )
+            await ctx.send(embed=embed)
 
     else:
         return
@@ -204,24 +214,34 @@ async def due_in(ctx, course: str, days: int):
     """
 
     if (ctx.message.channel.name == channel_name):
-        day_delta = datetime.timedelta(days = days+1)
 
-        result = get_items("duein", course, day_delta)
+        if (course.upper() in course_list or course.upper == "ALL"):
+            day_delta = datetime.timedelta(days = days+1)
 
-        #formats the start and due dates in the result 
-        for x in range(len(result)):
-            result[x] = list(result[x])
-            result[x][2] = result[x][2].strftime("%a, %b %d %Y, %I:%M %p") 
-            result[x][3] = result[x][3].strftime("%a, %b %d %Y, %I:%M %p")
+            result = get_items("duein", course, day_delta)
 
-        
-        # sends a message saying there are no assignments due if the resultant queried database list is empty 
-        if len(result) == 0:
-            await ctx.send(f"There are no assignments due in {days} days! :smiley:")
-        
-        # else sends the tabulated graph of the list 
-        else:
-            await ctx.send(f"```\n{tabulate(result, headers = headers)}\n```")
+            #formats the start and due dates in the result 
+            for x in range(len(result)):
+                result[x] = list(result[x])
+                result[x][2] = result[x][2].strftime("%a, %b %d %Y, %I:%M %p") 
+                result[x][3] = result[x][3].strftime("%a, %b %d %Y, %I:%M %p")
+
+            
+            # sends a message saying there are no assignments due if the resultant queried database list is empty 
+            if len(result) == 0:
+                await ctx.send(f"There are no assignments due in {days} days! :smiley:")
+            
+            # else sends the tabulated graph of the list 
+            else:
+                await ctx.send(f"```\n{tabulate(result, headers = headers)}\n```")
+
+        else: 
+            embed = discord.Embed(
+                title = "Invalid Course Given", 
+                colour = 16718848,
+                description = "Please enter a valid course. \nTo see a list of courses use `^courses`"
+            )
+            await ctx.send(embed=embed)
 
     else:
         return
@@ -243,23 +263,33 @@ async def start_in(ctx, course: str, days: int):
     """
 
     if (ctx.message.channel.name == channel_name):
-        day_delta = datetime.timedelta(days = days+1)
 
-        result = get_items("startin", course, day_delta)
+        if (course.upper() in course_list or course.upper == "ALL"):
+            day_delta = datetime.timedelta(days = days+1)
 
-        #formats the start and due dates in the result 
-        for x in range(len(result)):
-            result[x] = list(result[x])
-            result[x][2] = result[x][2].strftime("%a, %b %d %Y, %I:%M %p") 
-            result[x][3] = result[x][3].strftime("%a, %b %d %Y, %I:%M %p")
+            result = get_items("startin", course, day_delta)
 
-        # sends a message saying there are no assignments starting if the resultant queried database list is empty 
-        if len(result) == 0:
-            await ctx.send(f"There are no assignments starting in {days} days! :smiley:")
-        
-        # else sends the tabulated graph of the list 
-        else:
-            await ctx.send(f"```\n{tabulate(result, headers = headers)}\n```")
+            #formats the start and due dates in the result 
+            for x in range(len(result)):
+                result[x] = list(result[x])
+                result[x][2] = result[x][2].strftime("%a, %b %d %Y, %I:%M %p") 
+                result[x][3] = result[x][3].strftime("%a, %b %d %Y, %I:%M %p")
+
+            # sends a message saying there are no assignments starting if the resultant queried database list is empty 
+            if len(result) == 0:
+                await ctx.send(f"There are no assignments starting in {days} days! :smiley:")
+            
+            # else sends the tabulated graph of the list 
+            else:
+                await ctx.send(f"```\n{tabulate(result, headers = headers)}\n```")
+
+        else: 
+            embed = discord.Embed(
+                title = "Invalid Course Given", 
+                colour = 16718848,
+                description = "Please enter a valid course. \nTo see a list of courses use `^courses`"
+            )
+            await ctx.send(embed=embed)
 
     else:
         return
