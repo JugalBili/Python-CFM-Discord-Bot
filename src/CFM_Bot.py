@@ -163,7 +163,7 @@ async def assign(ctx, course: str):
     """
     if (ctx.message.channel.name == channel_name):
         
-        if (course.upper() in course_list or course.upper == "ALL"): 
+        if (course.upper() in course_list or course.upper() == "ALL"): 
             #reconnects to database if connection is lost
             if(mydb.is_connected()):
                 pass
