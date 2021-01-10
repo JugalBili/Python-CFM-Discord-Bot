@@ -27,7 +27,7 @@ db = os.getenv("SQL_NAME")
 
 tz = pytz.timezone("US/Eastern")
 headers = ["Course", "Assignment", "Start Date", "Due Date"]
-course_list =["AFM101", "AFM132", "CS135", "MATH135", "MATH137"]
+course_list =["AFM102", "AFM121", "CS136", "MATH136", "MATH138", "MATH128"]
 
 # Connects to the MySQL Database 
 mydb = mysql.connector.connect(
@@ -143,7 +143,7 @@ async def courses(ctx):
         embed = discord.Embed(
             title = "List of Courses",
             colour = 6673663, 
-            description= "- `{}`\n- `{}`\n- `{}`\n- `{}`\n- `{}`".format(course_list[0],course_list[1], course_list[2], course_list[3], course_list[4])
+            description= "- `{}`\n- `{}`\n- `{}`\n- `{}`\n- `{}`\n- `{}`".format(course_list[0],course_list[1], course_list[2], course_list[3], course_list[4], course_list[5])
             )
 
         await ctx.send(embed=embed) # sends the embed message to the discord channel
