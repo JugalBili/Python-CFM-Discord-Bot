@@ -7,6 +7,7 @@ import datetime
 from tabulate import tabulate # pip install tabulate
 import asyncio
 import pytz # pip install pytz
+from make_pages import make_pages
 
 # Initializes the Discord bot and set the command
 bot = commands.Bot(command_prefix = "^", intents = discord.Intents.default())
@@ -184,7 +185,9 @@ async def assign(ctx, course: str):
                 result[x][2] = result[x][2].strftime("%a, %b %d %Y, %I:%M %p") 
                 result[x][3] = result[x][3].strftime("%a, %b %d %Y, %I:%M %p")
 
-            await ctx.send(f"```\n{tabulate(result, headers = headers)}\n```") # sends the tabulated queries to the discord channel
+            toSend = make_pages(result, headers) # calls the make_pages function to get a list of "pages" of assignments
+            for message in toSend:
+                await ctx.send(message) # sends the tabulated queries to the discord channel
         
         else: 
             embed = discord.Embed(
@@ -233,7 +236,9 @@ async def due_in(ctx, course: str, days: int):
             
             # else sends the tabulated graph of the list 
             else:
-                await ctx.send(f"```\n{tabulate(result, headers = headers)}\n```")
+                toSend = make_pages(result, headers) # calls the make_pages function to get a list of "pages" of assignments
+                for message in toSend:
+                    await ctx.send(message)
 
         else: 
             embed = discord.Embed(
@@ -278,10 +283,12 @@ async def start_in(ctx, course: str, days: int):
             # sends a message saying there are no assignments starting if the resultant queried database list is empty 
             if len(result) == 0:
                 await ctx.send(f"There are no assignments starting in {days} days! :smiley:")
-            
+
             # else sends the tabulated graph of the list 
             else:
-                await ctx.send(f"```\n{tabulate(result, headers = headers)}\n```")
+                toSend = make_pages(result, headers) # calls the make_pages function to get a list of "pages" of assignments
+                for message in toSend:
+                    await ctx.send(message)
 
         else: 
             embed = discord.Embed(
@@ -339,6 +346,8 @@ async def errors(ctx, error):
                 description = "An Error has occured, please try again."
             )
         await ctx.send(embed = embed)
+    
+    print(error)
 
 
 # constant time datetime object which sets the time when to send the reminder
